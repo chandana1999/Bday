@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+  background-image: url('celebration-background1.jpg');
+  background-size: cover;
+  background-position: center;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+#card {
+  width: 350px;
+  padding: 20px;
+  border: 1px solid #ced4da;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+#messageContainer {
+  margin-bottom: 20px;
+  overflow: hidden;
+  opacity: 1;
+  font-size: 16px;
+  color: #8a2be2;
+  letter-spacing: 2px;
+  line-height: 1.5;
+}
+
+#mediaContainer {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+#mediaContainer img,
+#mediaContainer video,
+#videoPlayer {
+  max-width: 100%; /* Ensure the video doesn't exceed the container width */
+  max-height: 200px; /* Set the maximum height for the video */
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  object-fit: contain; /* Adjust the object-fit property as needed */
+  position: relative; /* Changed from absolute to relative */
+  top: 0; /* Removed the top: 50% */
+  left: 0; /* Removed the left: 50% */
+  transform: translate(0, 0); /* Removed the transform property */
+  z-index: 1;
+}
+#mediaContainer audio {
+  width: 100%;
+  max-height: 250px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  object-fit: cover;
+  position: relative; /* Changed from absolute to relative */
+  top: 0; /* Removed the top: 50% */
+  left: 0; /* Removed the left: 50% */
+  transform: translate(0, 0); /* Removed the transform property */
+  z-index: 1;
+}
+
+#buttonContainer {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+#playButton,
+#prevButton,
+#nextButton {
+  flex: 1;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+#playButton:hover,
+#prevButton:hover,
+#nextButton:hover {
+  background-color: #0056b3;
+}
+  </style>
+</head>
+<body>
+
+<div id="card">
+  <h2 style="color: #007bff;"></h2>
+  <div id="mediaContainer"></div>
+  <div id="messageContainer">Default Message</div>
+  <div id="buttonContainer">
+    <button id="prevButton">Previous</button>
+    <button id="playButton">Play</button>
+    <button id="nextButton">Next</button>
+  </div>
+  <audio id="audioPlayer" controls style="display: none;"></audio>
+  <video id="videoPlayer" controls style="display: none;"></video>
+
+  <script>
+    const messages = [
+      { text: "neen nange adyak sikkudyo eno ansutte ondondsala but still, ನನ್ನ ಬದುಕಿನ ಅದ್ಬುತ ಪರಿಚಯ ನೀನು...so neen huttidku saarthaka aythuu", audio: "bday1.m4a", video: "path/to/video1.mp4", image: "path/to/image1.jpg" },
+      { text: "En gothaa sumne e page galun eno create maadbute but en add maadadu anthane gothagthilla egaa...adru neen nang first sikdaaga neen nang istondella important agbodu anno ond idea nu irlilla adre adengo agogidya eglu heng aado eno innu gothagilla, gothagde iruvaglella chance sikkudre hinge oddakana anstude", audio: "path/to/audio2.mp3", video: "bday1.mp4", image: "path/to/image2.jpg" },
+      { text: "Innu e college ella bitre college gintha jasthi hogid place ide ansatte, adu nin favorite restaurant alvo gothilla but i am sure a hotel hodast sala innellu hogiralla,a place ge naan yaar jothe hodru nin jothe hodang ansalla nange", audio: "path/to/audio3.mp3", video: "path/to/video3.mp4", image: "Restaurant.jpg" },
+      { text: "innu en hakbeko gothilla lo nange, ist varsha naan bejar aadaga nang problem aaadag ella nan jotheli idya, inbetween eneno problem agirbodu ignore maadu adnella naanu nan maklu mommaklu gu parichaya maadkodthini ivn nan kapi antha allivargu friend ag irthini thal kediskobeda", audio: "bday2.m4a", video: "path/to/video5.mp4", image: "path/to/image5.jpg" },
+      { text: "Finally the last one yaavaglo e song helu antha kelidde naanu dairya maadi try maadde but idralli haako dairya barlilla, adke original song ne kalusthidini kelko", audio: "path/to/audio6.mp3", video: "bday3.mp4", image: "path/to/image6.jpg" },
+      { text: "Once again happy birthday kapi....e nadve thumba busy agogidya onchur olle buddi kali inn munde adruve", audio: "path/to/audio7.mp3", video: "path/to/video7.mp4", image: "path/to/image7.jpg" },
+    ];
+
+    let currentIndex = 0;
+
+    const card = document.getElementById('card');
+    const messageContainer = document.getElementById('messageContainer');
+    const mediaContainer = document.getElementById('mediaContainer');
+    const playButton = document.getElementById('playButton');
+    const prevButton = document.getElementById('prevButton');
+    const nextButton = document.getElementById('nextButton');
+    const audioPlayer = document.getElementById('audioPlayer');
+    const videoPlayer = document.getElementById('videoPlayer');
+
+    function updateDisplay() {
+      card.style.opacity = 0;
+      card.style.transform = 'translateY(10px)';
+      messageContainer.textContent = ''; // Clear previous content
+      mediaContainer.style.opacity = 0;
+
+      setTimeout(() => {
+        card.style.opacity = 1;
+        card.style.transform = 'translateY(0)';
+
+        // Display media (audio, video, or image) based on the index of the current message
+        if (currentIndex % 3 === 0) {
+          audioPlayer.src = messages[currentIndex].audio;
+          audioPlayer.style.display = 'block';
+          videoPlayer.style.display = 'none';
+          mediaContainer.innerHTML = ''; // Clear any previous image
+        } else if (currentIndex % 3 === 1) {
+          videoPlayer.src = messages[currentIndex].video;
+          videoPlayer.style.display = 'block';
+          audioPlayer.style.display = 'none';
+          mediaContainer.innerHTML = ''; // Clear any previous image
+        } else {
+          mediaContainer.innerHTML = `<img src="${messages[currentIndex].image}" alt="Greeting Image">`;
+          audioPlayer.style.display = 'none';
+          videoPlayer.style.display = 'none';
+        }
+
+        playButton.disabled = false;
+
+        // Display the message text
+        messageContainer.textContent = messages[currentIndex].text;
+
+        setTimeout(() => {
+          mediaContainer.style.opacity = 1;
+        }, 200);
+      }, 500);
+    }
+
+    playButton.addEventListener('click', () => {
+      if (currentIndex % 3 === 0) {
+        audioPlayer.play();
+      } else if (currentIndex % 3 === 1) {
+        videoPlayer.play();
+      }
+      // Image doesn't have a play action
+    });
+
+    prevButton.addEventListener('click', () => {
+      currentIndex = (currentIndex - 1 + messages.length) % messages.length;
+      updateDisplay();
+    });
+
+    nextButton.addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % messages.length;
+      updateDisplay();
+    });
+
+    // Initialize the display
+    updateDisplay();
+  </script>
+
+</body>
+</html>
